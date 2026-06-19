@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Registrácia používateľa WiFi</title>
+  <meta name="description" content="Moderný formulár na používanie WiFi siete s pravidlami používania." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#0a0f1c;
+      --bg-soft:#10182b;
+      --panel:rgba(18, 29, 51, 0.74);
+      --panel-strong:rgba(15, 24, 44, 0.92);
+      --line:rgba(255,255,255,0.1);
+      --text:#ecf3ff;
+      --muted:#aeb8cf;
+      --accent:#64e6c3;
+      --accent-2:#7aa8ff;
+      --accent-3:#ffd36f;
+      --danger:#ff8c8c;
+      --shadow:0 20px 80px rgba(0,0,0,.35);
+      --radius:24px;
+      --radius-sm:16px;
+      --max:1280px;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family:"Manrope", sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at 10% 20%, rgba(100,230,195,.18), transparent 28%),
+        radial-gradient(circle at 88% 14%, rgba(122,168,255,.18), transparent 24%),
+        radial-gradient(circle at 70% 80%, rgba(255,211,111,.08), transparent 18%),
+        linear-gradient(180deg, #09101d 0%, #0b1222 48%, #0a0f1c 100%);
+      min-height:100vh;
+      overflow-x:hidden;
+    }
+
+    body::before{
+      content:"";
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      background:
+        linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px);
+      background-size:32px 32px;
+      mask-image:linear-gradient(to bottom, rgba(0,0,0,.25), rgba(0,0,0,.8));
+      opacity:.25;
+    }
+
+    .orb{
+      position:fixed;
+      border-radius:50%;
+      filter:blur(50px);
+      pointer-events:none;
+      z-index:0;
+      opacity:.45;
+      animation:float 12s ease-in-out infinite;
+    }
+
+    .orb.one{
+      width:320px;height:320px;
+      background:rgba(100,230,195,.16);
+      top:120px;left:-60px;
+    }
+    .orb.two{
+      width:300px;height:300px;
+      background:rgba(122,168,255,.18);
+      right:-60px;top:240px;
+      animation-delay:-4s;
+    }
+    .orb.three{
+      width:240px;height:240px;
+      background:rgba(255,211,111,.11);
+      left:40%;bottom:5%;
+      animation-delay:-7s;
+    }
+
+    @keyframes float{
+      0%,100%{transform:translateY(0) translateX(0)}
+      50%{transform:translateY(-18px) translateX(14px)}
+    }
+
+    .page{
+      position:relative;
+      z-index:1;
+      width:min(calc(100% - 32px), var(--max));
+      margin:0 auto;
+      padding:28px 0 80px;
+    }
+
+    .hero{
+      display:grid;
+      grid-template-columns:1.1fr .9fr;
+      gap:28px;
+      align-items:stretch;
+      min-height:calc(100vh - 56px);
+      padding-top:18px;
+    }
+
+    .hero-copy,
+    .hero-panel,
+    .rules,
+    .notice{
+      backdrop-filter:blur(14px);
+      -webkit-backdrop-filter:blur(14px);
+      background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      border:1px solid var(--line);
+      box-shadow:var(--shadow);
+    }
+
+    .hero-copy{
+      border-radius:32px;
+      padding:clamp(28px, 4vw, 54px);
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+      position:relative;
+      overflow:hidden;
+    }
+
+    .hero-copy::after{
+      content:"";
+      position:absolute;
+      inset:auto -10% -25% auto;
+      width:320px;height:320px;
+      background:
+        radial-gradient(circle, rgba(100,230,195,.28), transparent 62%);
+      pointer-events:none;
+    }
+
+    .eyebrow{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      padding:10px 14px;
+      border-radius:999px;
+      background:rgba(255,255,255,.05);
+      border:1px solid rgba(255,255,255,.09);
+      color:var(--accent);
+      font-size:.85rem;
+      font-weight:700;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      width:max-content;
+    }
+
+    .eyebrow::before{
+      content:"";
+      width:8px;height:8px;border-radius:50%;
+      background:var(--accent);
+      box-shadow:0 0 0 6px rgba(100,230,195,.12);
+    }
+
+    h1,h2,h3{
+      font-family:"Space Grotesk", sans-serif;
+      margin:0;
+      letter-spacing:-0.04em;
+      line-height:.95;
+    }
+
+    h1{
+      font-size:clamp(3rem, 8vw, 7rem);
+      max-width:10ch;
+      margin-top:18px;
+    }
+
+    .lead{
+      margin:24px 0 0;
+      max-width:58ch;
+      font-size:clamp(1rem, 1.35vw, 1.15rem);
+      line-height:1.75;
+      color:var(--muted);
+    }
+
+    .hero-stats{
+      margin-top:34px;
+      display:grid;
+      grid-template-columns:repeat(3, minmax(0,1fr));
+      gap:14px;
+    }
+
+    .stat{
+      padding:18px 16px;
+      border-radius:20px;
+      background:rgba(255,255,255,.035);
+      border:1px solid rgba(255,255,255,.08);
+    }
+
+    .stat strong{
+      display:block;
+      font-family:"Space Grotesk", sans-serif;
+      font-size:1.45rem;
+      color:var(--text);
+      margin-bottom:6px;
+    }
+
+    .stat span{
+      color:var(--muted);
+      font-size:.92rem;
+      line-height:1.5;
+    }
+
+    .hero-panel{
+      border-radius:32px;
+      padding:clamp(22px, 3vw, 34px);
+      background:
+        linear-gradient(180deg, rgba(14,23,43,.86), rgba(10,16,28,.94));
+      position:relative;
+      overflow:hidden;
+    }
+
+    .hero-panel::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:
+        radial-gradient(circle at top right, rgba(122,168,255,.18), transparent 34%),
+        radial-gradient(circle at bottom left, rgba(100,230,195,.13), transparent 34%);
+      pointer-events:none;
+    }
+
+    .panel-top{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:16px;
+      margin-bottom:18px;
+      position:relative;
+      z-index:1;
+    }
+
+    .panel-top h2{
+      font-size:clamp(1.7rem, 3vw, 2.4rem);
+      margin-bottom:8px;
+    }
+
+    .panel-top p{
+      margin:0;
+      color:var(--muted);
+      line-height:1.6;
+      max-width:42ch;
+    }
+
+    .badge{
+      flex-shrink:0;
+      padding:10px 14px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.1);
+      background:rgba(255,255,255,.05);
+      color:var(--accent-3);
+      font-weight:800;
+      font-size:.82rem;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+    }
+
+    form{
+      position:relative;
+      z-index:1;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(2, minmax(0,1fr));
+      gap:14px;
+    }
+
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+
+    .field.full{
+      grid-column:1 / -1;
+    }
+
+    label{
+      font-size:.92rem;
+      color:#d8e2f7;
+      font-weight:700;
+      letter-spacing:.01em;
+    }
+
+    input, textarea, select{
+      width:100%;
+      appearance:none;
+      border:none;
+      outline:none;
+      padding:15px 16px;
+      border-radius:16px;
+      background:rgba(255,255,255,.055);
+      border:1px solid rgba(255,255,255,.1);
+      color:var(--text);
+      font:inherit;
+      transition:border-color .25s ease, transform .25s ease, box-shadow .25s ease, background .25s ease;
+    }
+
+    input::placeholder, textarea::placeholder{
+      color:#93a3c8;
+    }
+
+    input:focus, textarea:focus, select:focus{
+      border-color:rgba(100,230,195,.6);
+      box-shadow:0 0 0 4px rgba(100,230,195,.12);
+      transform:translateY(-1px);
+      background:rgba(255,255,255,.07);
+    }
+
+    textarea{
+      min-height:120px;
+      resize:vertical;
+    }
+
+    .checks{
+      display:grid;
+      gap:12px;
+      margin-top:18px;
+    }
+
+    .check{
+      display:flex;
+      align-items:flex-start;
+      gap:12px;
+      padding:14px 14px;
+      border-radius:18px;
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.08);
+    }
+
+    .check input{
+      width:18px;
+      height:18px;
+      margin-top:2px;
+      accent-color:var(--accent);
+      flex-shrink:0;
+    }
+
+    .check label{
+      font-weight:600;
+      color:var(--muted);
+      line-height:1.55;
+    }
+
+    .actions{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      margin-top:20px;
+      flex-wrap:wrap;
+    }
+
+    .hint{
+      color:var(--muted);
+      font-size:.92rem;
+      line-height:1.55;
+      max-width:40ch;
+    }
+
+    .btn{
+      border:none;
+      outline:none;
+      cursor:pointer;
+      padding:16px 22px;
+      border-radius:18px;
+      font-family:"Space Grotesk", sans-serif;
+      font-weight:700;
+      font-size:1rem;
+      letter-spacing:-0.02em;
+      color:#07111c;
+      background:linear-gradient(135deg, var(--accent) 0%, #9af0db 100%);
+      box-shadow:0 16px 30px rgba(100,230,195,.22);
+      transition:transform .25s ease, box-shadow .25s ease, filter .25s ease;
+    }
+
+    .btn:hover{
+      transform:translateY(-2px) scale(1.01);
+      box-shadow:0 22px 38px rgba(100,230,195,.28);
+      filter:saturate(1.08);
+    }
+
+    .btn:active{
+      transform:translateY(0) scale(.99);
+    }
+
+    .sections{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:24px;
+      margin-top:24px;
+    }
+
+    .rules, .notice{
+      border-radius:30px;
+      padding:clamp(24px, 3vw, 38px);
+    }
+
+    .rules-header{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-end;
+      gap:16px;
+      margin-bottom:24px;
+      flex-wrap:wrap;
+    }
+
+    .rules-header h2{
+      font-size:clamp(2rem, 4vw, 3.4rem);
+    }
+
+    .rules-header p{
+      margin:0;
+      color:var(--muted);
+      max-width:44ch;
+      line-height:1.7;
+    }
+
+    .rule-grid{
+      display:grid;
+      grid-template-columns:repeat(4, minmax(0,1fr));
+      gap:14px;
+    }
+
+    .rule{
+      padding:20px;
+      border-radius:22px;
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.08);
+      min-height:180px;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+    }
+
+    .rule .num{
+      font-family:"Space Grotesk", sans-serif;
+      font-size:1rem;
+      color:var(--accent);
+      font-weight:700;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+    }
+
+    .rule h3{
+      font-size:1.35rem;
+      margin:16px 0 10px;
+      line-height:1.05;
+    }
+
+    .rule p{
+      margin:0;
+      color:var(--muted);
+      line-height:1.65;
+      font-size:.96rem;
+    }
+
+    .notice{
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.03));
+    }
+
+    .notice h2{
+      font-size:clamp(2rem, 4vw, 3rem);
+      margin-bottom:16px;
+    }
+
+    .notice p{
+      margin:0 0 16px;
+      color:var(--muted);
+      line-height:1.9;
+      max-width:100ch;
+    }
+
+    .footer-note{
+      margin-top:24px;
+      padding:18px 20px;
+      border-radius:18px;
+      border:1px solid rgba(255,255,255,.08);
+      background:rgba(255,255,255,.035);
+      color:#dce8ff;
+      line-height:1.7;
+    }
+
+    .reveal{
+      opacity:0;
+      transform:translateY(22px);
+      animation:rise .8s ease forwards;
+    }
+
+    .delay-1{animation-delay:.1s}
+    .delay-2{animation-delay:.2s}
+    .delay-3{animation-delay:.3s}
+    .delay-4{animation-delay:.4s}
+    .delay-5{animation-delay:.5s}
+
+    @keyframes rise{
+      to{
+        opacity:1;
+        transform:translateY(0);
+      }
+    }
+
+    .inview{
+      opacity:0;
+      transform:translateY(26px);
+      transition:opacity .8s ease, transform .8s ease;
+    }
+
+    .inview.show{
+      opacity:1;
+      transform:translateY(0);
+    }
+
+    @media (max-width: 1100px){
+      .hero{
+        grid-template-columns:1fr;
+        min-height:auto;
+      }
+      .rule-grid{
+        grid-template-columns:repeat(2, minmax(0,1fr));
+      }
+    }
+
+    @media (max-width: 720px){
+      .page{
+        width:min(calc(100% - 20px), var(--max));
+        padding-top:12px;
+      }
+      .hero-copy, .hero-panel, .rules, .notice{
+        border-radius:24px;
+      }
+      .grid, .rule-grid, .hero-stats{
+        grid-template-columns:1fr;
+      }
+      .panel-top{
+        flex-direction:column;
+      }
+      h1{
+        max-width:12ch;
+      }
+      .actions{
+        align-items:stretch;
+      }
+      .btn{
+        width:100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="orb one"></div>
+  <div class="orb two"></div>
+  <div class="orb three"></div>
+
+  <main class="page">
+    <section class="hero">
+      <div class="hero-copy reveal delay-1">
+        <div>
+          <div class="eyebrow">Súkromná WiFi registrácia</div>
+          <h1>Formulár na používanie WiFi siete</h1>
+          <p class="lead">
+            Vyplň tento moderný registračný formulár. Slúži na evidenciu používateľov WiFi, súhlas s pravidlami
+            a zodpovedné využívanie dát. Sieť má mesačný limit <strong>300 GB</strong>, preto je dôležité, aby ju
+            každý používal rozumne a férovo.
+          </p>
+        </div>
+
+        <div class="hero-stats">
+          <div class="stat reveal delay-2">
+            <strong>300 GB</strong>
+            <span>mesačný dátový limit siete</span>
+          </div>
+          <div class="stat reveal delay-3">
+            <strong>1 používateľ</strong>
+            <span>na WiFi môže byť pripojený iba jeden používateľ</span>
+          </div>
+          <div class="stat reveal delay-4">
+            <strong>2 zariadenia</strong>
+            <span>štandardný limit zariadení pre používateľa</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-panel reveal delay-2">
+        <div class="panel-top">
+          <div>
+            <h2>Registračný formulár</h2>
+            <p>
+              Vyplň všetkých 30 okienok. Po odoslaní budú údaje zaslané cez FormInit.
+            </p>
+          </div>
+          <div class="badge">30 polí</div>
+        </div>
+
+        <form action="https://forminit.com/f/bvrmwxdb" method="POST">
+          <div class="grid">
+            <div class="field">
+              <label for="meno">1. Meno</label>
+              <input type="text" id="meno" name="meno" placeholder="Zadaj meno" required>
+            </div>
+            <div class="field">
+              <label for="priezvisko">2. Priezvisko</label>
+              <input type="text" id="priezvisko" name="priezvisko" placeholder="Zadaj priezvisko" required>
+            </div>
+
+            <div class="field">
+              <label for="nick">3. Prezývka / Nick</label>
+              <input type="text" id="nick" name="nick" placeholder="Napr. Majo123">
+            </div>
+            <div class="field">
+              <label for="vek">4. Vek</label>
+              <input type="number" id="vek" name="vek" placeholder="Zadaj vek" min="1" max="120">
+            </div>
+
+            <div class="field">
+              <label for="email">5. E-mail</label>
+              <input type="email" id="email" name="email" placeholder="tvoj@email.sk" required>
+            </div>
+            <div class="field">
+              <label for="telefon">6. Telefónne číslo</label>
+              <input type="tel" id="telefon" name="telefon" placeholder="+421 ...">
+            </div>
+
+            <div class="field">
+              <label for="adresa">7. Adresa</label>
+              <input type="text" id="adresa" name="adresa" placeholder="Ulica a číslo">
+            </div>
+            <div class="field">
+              <label for="mesto">8. Mesto / Obec</label>
+              <input type="text" id="mesto" name="mesto" placeholder="Mesto alebo obec">
+            </div>
+
+            <div class="field">
+              <label for="psc">9. PSČ</label>
+              <input type="text" id="psc" name="psc" placeholder="PSČ">
+            </div>
+            <div class="field">
+              <label for="krajina">10. Krajina</label>
+              <input type="text" id="krajina" name="krajina" placeholder="Slovensko">
+            </div>
+
+            <div class="field">
+              <label for="obciansky">11. Číslo dokladu / OP</label>
+              <input type="text" id="obciansky" name="obciansky" placeholder="Nepovinné">
+            </div>
+            <div class="field">
+              <label for="datum">12. Dátum registrácie</label>
+              <input type="date" id="datum" name="datum">
+            </div>
+
+            <div class="field">
+              <label for="zariadenie1">13. Zariadenie č. 1</label>
+              <input type="text" id="zariadenie1" name="zariadenie1" placeholder="Napr. Samsung Galaxy">
+            </div>
+            <div class="field">
+              <label for="zariadenie2">14. Zariadenie č. 2</label>
+              <input type="text" id="zariadenie2" name="zariadenie2" placeholder="Napr. Notebook Lenovo">
+            </div>
+
+            <div class="field">
+              <label for="mac1">15. MAC adresa zariadenia 1</label>
+              <input type="text" id="mac1" name="mac1" placeholder="AA:BB:CC:DD:EE:FF">
+            </div>
+            <div class="field">
+              <label for="mac2">16. MAC adresa zariadenia 2</label>
+              <input type="text" id="mac2" name="mac2" placeholder="AA:BB:CC:DD:EE:FF">
+            </div>
+
+            <div class="field">
+              <label for="typ1">17. Typ zariadenia 1</label>
+              <select id="typ1" name="typ1">
+                <option value="">Vyber typ</option>
+                <option>Mobil</option>
+                <option>Notebook</option>
+                <option>Tablet</option>
+                <option>TV</option>
+                <option>Iné</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="typ2">18. Typ zariadenia 2</label>
+              <select id="typ2" name="typ2">
+                <option value="">Vyber typ</option>
+                <option>Mobil</option>
+                <option>Notebook</option>
+                <option>Tablet</option>
+                <option>TV</option>
+                <option>Iné</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="vyuzitie">19. Účel používania WiFi</label>
+              <input type="text" id="vyuzitie" name="vyuzitie" placeholder="Bežné surfovanie, práca, škola...">
+            </div>
+            <div class="field">
+              <label for="cas">20. Najčastejší čas používania</label>
+              <input type="text" id="cas" name="cas" placeholder="Ráno / večer / celý deň">
+            </div>
+
+            <div class="field">
+              <label for="download">21. Odhadované sťahovanie mesačne</label>
+              <input type="text" id="download" name="download" placeholder="Napr. 20 GB">
+            </div>
+            <div class="field">
+              <label for="stream">22. Používaš streaming?</label>
+              <select id="stream" name="stream">
+                <option value="">Vyber možnosť</option>
+                <option>Áno</option>
+                <option>Nie</option>
+                <option>Občas</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="hry">23. Online hry</label>
+              <select id="hry" name="hry">
+                <option value="">Vyber možnosť</option>
+                <option>Áno</option>
+                <option>Nie</option>
+                <option>Občas</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="praca">24. Využitie na prácu / školu</label>
+              <select id="praca" name="praca">
+                <option value="">Vyber možnosť</option>
+                <option>Áno</option>
+                <option>Nie</option>
+                <option>Občas</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="pocet_osob">25. Počet osôb, čo budú WiFi používať</label>
+              <input type="number" id="pocet_osob" name="pocet_osob" min="1" max="10" placeholder="1">
+            </div>
+            <div class="field">
+              <label for="vlastnik_vztah">26. Vzťah k vlastníkovi WiFi</label>
+              <input type="text" id="vlastnik_vztah" name="vlastnik_vztah" placeholder="Rodina, známy, nájomník...">
+            </div>
+
+            <div class="field">
+              <label for="heslo_info">27. Poznámka k prístupu</label>
+              <input type="text" id="heslo_info" name="heslo_info" placeholder="Doplňujúce informácie">
+            </div>
+            <div class="field">
+              <label for="suhlas_meno">28. Meno osoby, ktorá súhlasí s pravidlami</label>
+              <input type="text" id="suhlas_meno" name="suhlas_meno" placeholder="Celé meno" required>
+            </div>
+
+            <div class="field">
+              <label for="miesto_podpisu">29. Miesto</label>
+              <input type="text" id="miesto_podpisu" name="miesto_podpisu" placeholder="Mesto / obec">
+            </div>
+            <div class="field">
+              <label for="datum_podpisu">30. Dátum potvrdenia</label>
+              <input type="date" id="datum_podpisu" name="datum_podpisu" required>
+            </div>
+
+            <div class="field full">
+              <label for="poznamka">Doplňujúca poznámka</label>
+              <textarea id="poznamka" name="poznamka" placeholder="Sem môžeš napísať ďalšie informácie, špeciálne požiadavky alebo vysvetlenie používania WiFi."></textarea>
+            </div>
+          </div>
+
+          <div class="checks">
+            <div class="check">
+              <input type="checkbox" id="check1" name="suhlas_pravidla" required>
+              <label for="check1">Potvrdzujem, že som si prečítal/a pravidlá používania WiFi a súhlasím s tým, že ich budem dodržiavať.</label>
+            </div>
+            <div class="check">
+              <input type="checkbox" id="check2" name="suhlas_limit" required>
+              <label for="check2">Beriem na vedomie, že sieť má limit 300 GB mesačne a veľké sťahovanie je povolené najmä ku koncu mesiaca.</label>
+            </div>
+            <div class="check">
+              <input type="checkbox" id="check3" name="suhlas_zariadenia" required>
+              <label for="check3">Rozumiem, že na WiFi môže byť pripojený iba jeden používateľ a štandardne maximálne 2 zariadenia, ak vlastník neurčí inak.</label>
+            </div>
+          </div>
+
+          <div class="actions">
+            <div class="hint">
+              Po odoslaní sa formulár automaticky odošle na zadaný FormInit endpoint.
+            </div>
+            <button class="btn" type="submit">Odoslať formulár</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <section class="sections">
+      <section class="rules inview">
+        <div class="rules-header">
+          <div>
+            <div class="eyebrow">Pravidlá siete</div>
+            <h2>Pravidlá používania WiFi</h2>
+          </div>
+          <p>
+            Tieto pravidlá slúžia na to, aby bola WiFi stabilná, férová a použiteľná pre všetkých, ktorí majú povolený prístup.
+          </p>
+        </div>
+
+        <div class="rule-grid">
+          <article class="rule">
+            <div class="num">Pravidlo 01</div>
+            <div>
+              <h3>Mesačný limit dát</h3>
+              <p>WiFi má kapacitu 300 GB na mesiac. Dáta je potrebné využívať rozumne, aby pripojenie vydržalo počas celého mesiaca.</p>
+            </div>
+          </article>
+
+          <article class="rule">
+            <div class="num">Pravidlo 02</div>
+            <div>
+              <h3>Sťahovanie až ku koncu mesiaca</h3>
+              <p>Väčšie sťahovanie súborov, filmov, hier alebo aktualizácií je vhodné robiť vždy skôr ku koncu mesiaca, aby WiFi vydržala.</p>
+            </div>
+          </article>
+
+          <article class="rule">
+            <div class="num">Pravidlo 03</div>
+            <div>
+              <h3>Jeden používateľ</h3>
+              <p>Na WiFi môže byť pripojený iba jeden používateľ. Tým sa zabezpečí stabilita a férové rozdelenie dátového limitu.</p>
+            </div>
+          </article>
+
+          <article class="rule">
+            <div class="num">Pravidlo 04</div>
+            <div>
+              <h3>Dve zariadenia</h3>
+              <p>Bežný používateľ môže mať pripojené maximálne 2 zariadenia. Je potrebné nahlásiť, ktoré zariadenia budú používané.</p>
+            </div>
+          </article>
+
+          <article class="rule">
+            <div class="num">Pravidlo 05</div>
+            <div>
+              <h3>Výnimka pre vlastníka</h3>
+              <p>Vlastník WiFi môže pripojiť viac zariadení, ak v tom čase nebude pripojený nikto iný a sieť nebude obmedzovať ostatných.</p>
+            </div>
+          </article>
+
+          <article class="rule">
+            <div class="num">Pravidlo 06</div>
+            <div>
+              <h3>Bez zdieľania prístupu</h3>
+              <p>Prístup k WiFi nie je dovolené poskytovať ďalším osobám bez povolenia vlastníka. Heslo a prístupové údaje sú súkromné.</p>
+            </div>
+          </article>
+
+          <article class="rule">
+            <div class="num">Pravidlo 07</div>
+            <div>
+              <h3>Ohľaduplné používanie</h3>
+              <p>Je potrebné vyhnúť sa neustálemu streamovaniu vo vysokej kvalite, masívnym aktualizáciám a neprimeranému zaťažovaniu siete.</p>
+            </div>
+          </article>
+
+          <article class="rule">
+            <div class="num">Pravidlo 08</div>
+            <div>
+              <h3>Možnosť obmedzenia</h3>
+              <p>Ak sa pravidlá nebudú dodržiavať, vlastník WiFi môže prístup obmedziť, dočasne vypnúť alebo úplne zrušiť bez nároku na náhradu.</p>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="notice inview">
+        <div class="eyebrow">Dôležité informácie</div>
+        <h2>Dlhší text pod formulárom</h2>
+        <p>
+          Táto WiFi sieť je určená na bežné používanie internetu, komunikáciu, školské a pracovné účely, prehliadanie webu,
+          sociálne siete a primerané sledovanie obsahu. Keďže ide o sieť s obmedzeným mesačným balíkom dát, je potrebné,
+          aby každý používateľ pristupoval k jej využívaniu zodpovedne. Limit siete je 300 GB na mesiac, čo znamená, že
+          pri neobmedzenom sťahovaní veľkých súborov by mohlo dôjsť k rýchlemu vyčerpaniu dát a následne by internet nemusel
+          byť k dispozícii vtedy, keď ho bude niekto naozaj potrebovať.
+        </p>
+        <p>
+          Z tohto dôvodu platí pravidlo, že väčšie sťahovanie je vhodné presúvať najmä na koniec mesiaca. To sa týka
+          napríklad sťahovania veľkých hier, filmov, záloh, rozsiahlych aktualizácií operačných systémov alebo iných objemných
+          dát. Cieľom nie je niekoho obmedzovať bez dôvodu, ale udržať WiFi funkčnú a stabilnú počas celého mesiaca.
+          Ak bude internet používaný rozumne, bude dostupný pre všetky dôležité potreby bez zbytočných výpadkov a spomalení.
+        </p>
+        <p>
+          Ďalším dôležitým pravidlom je, že na WiFi môže byť pripojený iba jeden používateľ a štandardne maximálne 2 zariadenia.
+          Toto obmedzenie pomáha znížiť zaťaženie siete a zároveň udržiava prehľad o tom, kto a akým spôsobom internet využíva.
+          Vlastník WiFi má výnimku v tom, že môže pripojiť aj viac zariadení, avšak len vtedy, ak v tom čase nebude pripojený
+          nikto iný. Takéto nastavenie je férové voči všetkým a umožňuje pružne reagovať na situáciu bez toho, aby sa sieť
+          zahltila.
+        </p>
+        <p>
+          Používateľ berie na vedomie, že zdieľanie prístupu ďalším osobám bez súhlasu vlastníka nie je povolené. Rovnako nie je
+          vhodné využívať WiFi na činnosti, ktoré by mohli poškodiť sieť, znížiť jej výkon, ohroziť bezpečnosť alebo spôsobiť
+          nadmerné čerpanie dát. Každý, kto získa prístup, by mal rešpektovať pravidlá, používať len nahlásené zariadenia a
+          v prípade potreby komunikovať s vlastníkom otvorene a vopred.
+        </p>
+        <p>
+          Tento formulár slúži na jednoduchú registráciu a potvrdenie súhlasu s pravidlami používania. Vyplnením formulára
+          používateľ potvrdzuje pravdivosť údajov a súhlasí s tým, že bude WiFi využívať rozumne, slušne a s ohľadom na ostatných.
+          Ak sa pravidlá budú porušovať, vlastník si vyhradzuje právo prístup zrušiť alebo obmedziť. Cieľom tejto stránky je
+          nastaviť jasné podmienky, aby bolo všetko vopred zrozumiteľné, prehľadné a bez zbytočných nedorozumení.
+        </p>
+
+        <div class="footer-note">
+          <strong>Poznámka:</strong> Táto stránka je pripravená ako kompletné HTML riešenie s moderným dizajnom, responzívnym
+          rozložením a formulárom odosielaným na <code>https://forminit.com/f/bvrmwxdb</code>.
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script>
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if(entry.isIntersecting){
+          entry.target.classList.add('show');
+        }
+      });
+    }, { threshold: 0.14 });
+
+    document.querySelectorAll('.inview').forEach(el => observer.observe(el));
+  </script>
+</body>
+</html>
